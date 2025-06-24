@@ -1,3 +1,8 @@
+/**
+ * I dont know what all the things it can do 
+ * but for now, 1.  I know it can run migrations 
+ */
+
 import { defineConfig } from "drizzle-kit"
 import { config } from "dotenv"
 
