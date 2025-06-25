@@ -14,12 +14,12 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { FormInput, OctagonAlertIcon } from "lucide-react";
+import { FormInput, Loader, OctagonAlertIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { FaGoogle, FaGithub } from 'react-icons/fa'
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -28,7 +28,7 @@ const formSchema = z.object({
 
 const SignInView = () => {
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [isPending, setIsPending] = useState<boolean>(false);
   const formData = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,27 +38,38 @@ const SignInView = () => {
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    setIsPending(true);
     authClient.signIn.email(
       {
         email: data.email,
         password: data.password,
+        callbackURL: "/",
       },
       {
-        onSuccess: () => router.push("/"),
-        onError: ({ error }) => setError(error.message),
+        onSuccess: () => setIsPending(false),
+        onError: ({ error }) => {
+          setIsPending(false);
+          setError(error.message);
+        },
       }
     );
   };
 
   const onSocialLogin = (provider: "google" | "github") => {
-    authClient.signIn.social({
-      provider,
-    },
-    {
-      onSuccess: () => router.push("/"),
-      onError: ({ error }) => setError(error.message)
-    }
-  );
+    setIsPending(true);
+    authClient.signIn.social(
+      {
+        provider,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => setIsPending(false),
+        onError: ({ error }) => {
+          setIsPending(false);
+          setError(error.message);
+        },
+      }
+    );
   };
 
   return (
@@ -120,9 +131,10 @@ const SignInView = () => {
                   )}
                   <Button
                     type="submit"
-                    className="bg-[#18b656] text-md text-white hover:bg-[#18b656]/80"
+                    className="bg-[#18b656] relative text-md text-white hover:bg-[#18b656]/80"
                   >
                     Login
+                    {isPending && <Loader className="w-4 h-4 text-white font-bold animate-spin" />}
                   </Button>
                   <div className="text-center text-sm relative after:border-border after:border-t after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center">
                     <span className="px-2 bg-card text-muted-foreground z-10">
@@ -132,20 +144,20 @@ const SignInView = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <Button
-                      onClick={() => onSocialLogin('google')}
+                      onClick={() => onSocialLogin("google")}
                       variant="outline"
                       type="button"
                       className="w-full"
                     >
-                      Google
+                       Google <FaGoogle className="w-5 h-5 text-gray-600" />
                     </Button>
                     <Button
-                      onClick={() => onSocialLogin('github')}
+                      onClick={() => onSocialLogin("github")}
                       variant="outline"
                       type="button"
                       className="w-full"
                     >
-                      Github
+                      Github <FaGithub className="w-6 h-6 text-purple-600" />
                     </Button>
                   </div>
 
