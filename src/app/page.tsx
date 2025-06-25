@@ -22,7 +22,7 @@ export default function Home() {
     return (
       <div>
         <p className="text-2xl font-semibold">
-          You are already registered {session.user.name}
+          Welcome {session.user.name}!
         </p>
         <Button variant="destructive" onClick={onSignOut}>
           Sign out

@@ -61,6 +61,18 @@ const SignUpView = () => {
     );
   };
 
+  const onSocialLogin = (provider: "google" | "github") => {
+    authClient.signIn.social(
+      {
+        provider,
+      },
+      {
+        onSuccess: () => router.push("/"),
+        onError: ({ error }) => setError(error.message),
+      }
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <Card className="p-0 border-0 rounded-lg">
@@ -86,11 +98,7 @@ const SignUpView = () => {
                       <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="myname"
-                            {...field}
-                          />
+                          <Input type="text" placeholder="myname" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -163,10 +171,20 @@ const SignUpView = () => {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" type="button" className="w-full">
+                    <Button
+                      onClick={() => onSocialLogin('google')}
+                      variant="outline"
+                      type="button"
+                      className="w-full"
+                    >
                       Google
                     </Button>
-                    <Button variant="outline" type="button" className="w-full">
+                    <Button
+                      onClick={() => onSocialLogin('github')}
+                      variant="outline"
+                      type="button"
+                      className="w-full"
+                    >
                       Github
                     </Button>
                   </div>
