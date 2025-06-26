@@ -131,13 +131,13 @@ const SignInView = () => {
                   )}
                   <Button
                     type="submit"
-                    className="bg-[#18b656] relative text-md text-white hover:bg-[#18b656]/80"
+                    className="relative text-md text-white"
                   >
                     Login
                     {isPending && <Loader className="w-4 h-4 text-white font-bold animate-spin" />}
                   </Button>
-                  <div className="text-center text-sm relative after:border-border after:border-t after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center">
-                    <span className="px-2 bg-card text-muted-foreground z-10">
+                  <div className="text-center relative text-sm after:border-border after:border-t after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center">
+                    <span className="relative px-2 bg-card text-muted-foreground z-10">
                       Or continue with
                     </span>
                   </div>
@@ -175,7 +175,7 @@ const SignInView = () => {
             </form>
           </Form>
 
-          <div className="bg-radial from-green-600 to-green-800/80 rounded-r-lg relative hidden md:flex flex-col gap-y-4 items-center justify-center">
+          <div className="bg-radial from-sidebar-accent to-sidebar rounded-r-lg relative hidden md:flex flex-col gap-y-4 items-center justify-center">
             <img src="/logo.svg" alt="Image" className="w-[92px] h-[92px]" />
             <p className="text-white text-2xl font-semibold">Meet AI</p>
           </div>

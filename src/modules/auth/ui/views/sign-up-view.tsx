@@ -177,7 +177,7 @@ const SignUpView = () => {
                     {isPending && <Loader className="w-4 h-4 animate-spin" />}
                   </Button>
                   <div className="text-center text-sm relative after:border-border after:border-t after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center">
-                    <span className="px-2 bg-card text-muted-foreground z-10">
+                    <span className="relative px-2 bg-card text-muted-foreground z-10">
                       Or continue with
                     </span>
                   </div>

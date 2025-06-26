@@ -21,7 +21,7 @@ export default function HomeView() {
   return (
     <div>
       <p className="text-2xl font-semibold">Welcome </p>
-      <Button variant="destructive" onClick={onSignOut}>
+      <Button onClick={onSignOut}>
         Sign out
       </Button>
     </div>
