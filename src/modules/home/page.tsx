@@ -1,32 +1,9 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
-import Image from "next/image";
-import { useState } from "react";
-import { redirect } from "next/navigation";
-import { Loader } from "lucide-react";
-import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
-
+'use client'
 
 export default function HomeView() {
-  const trpc = useTRPC();
-  const { data }= useQuery(trpc.hello.queryOptions({ text: "world" }));
-  const onSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => redirect("/sign-in"),
-      },
-    });
-  };
-
-  //const { data: session, isPending } = authClient.useSession();
   return (
     <div>
-      <p className="text-2xl font-semibold">{data!.greeting}</p>
-      <Button onClick={onSignOut}>Sign out</Button>
+      Home View 
     </div>
   );
 }
