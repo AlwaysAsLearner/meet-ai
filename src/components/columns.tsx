@@ -14,7 +14,7 @@ export const columns: ColumnDef<AgentGetOne>[] = [
     accessorKey: "name",
     header: "Agent Name",
     cell: ({ row }) => (
-      <div className="flex flex-col gap-y-1.5">
+      <div className="flex flex-col gap-y-1.5 px-4 pt-2">
         <div className="flex items-center gap-x-2">
           <GenerateAvatar
             seed={row.original.name}
@@ -39,19 +39,14 @@ export const columns: ColumnDef<AgentGetOne>[] = [
     accessorKey: "meetingsCount",
     header: "Meetings",
     cell: ({ row }) => {
-      const meetingsCount = 5
       return(
       <Badge
         variant="outline"
         className="flex items-center gap-x-2 [&>svg]:size-4"
       >
         <VideoIcon className="text-blue-700" />
-        {meetingsCount}{" "}
-        {meetingsCount == 0
-          ? "No meetings"
-          : meetingsCount == 1
-          ? "Meeting"
-          : "Meetings"}
+        {row.original.meetingsCount ?? ""}{" "}
+        {row.original.meetingsCount > 1 ? "Meetings" : "Meeting"}
       </Badge>
     )},
   },

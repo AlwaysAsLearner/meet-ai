@@ -9,14 +9,29 @@ import ResponsiveDialog from "@/components/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAgentFilters } from "../hooks/use-agent-filters";
+import DataPagination from "./data-pagination";
 
 export const AgentsView = () => {
   const trpc = useTRPC();
-  const { data } = useSuspenseQuery(trpc.agents.getMany.queryOptions()); // using suspensQuery instead of normal query
+  const [filters, setFilters] = useAgentFilters()
+  const { data, isPending } = useSuspenseQuery(trpc.agents.getMany.queryOptions({ 
+    ...filters
+   })); // using suspensQuery instead of normal query
+
   return (
     <div className="flex-1 px-4 md:px-8 pb-4 flex flex-col gap-y-4">
-      <DataTable columns={columns} data={[]} />
-      {[].length == 0 && (
+      {isPending ? (
+        <AgentsViewLoading />
+      ) : (
+        <DataTable columns={columns} data={data.items} />
+      )}
+      <DataPagination 
+       page={filters.page}
+       totalPages={data.totalPages}
+       onPageChange={(page) => setFilters({ page })}
+      />
+      {data.items.length == 0 && (
         <EmptyState 
          title="Create your first Agent"
          description="Create an agent to join your meetings. Each agent will follow your instructions and can interact with participants during the call."

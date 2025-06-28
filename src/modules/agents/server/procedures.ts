@@ -1,45 +1,99 @@
 import { db } from "@/db";
 import { agents } from "@/db/schema";
-import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import {
+  baseProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { resolve } from "path";
 import { agentInsertSchema } from "../schemas";
 import { z } from "zod";
-import { eq, getTableColumns, sql } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
+import { config } from "dotenv";
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  MIN_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+} from "@/constants";
 
 export const agentsRouter = createTRPCRouter({
-    getMany: protectedProcedure.query(async() => {
-        const data = await db
-        .select()
+  getMany: protectedProcedure
+    .input(
+      z.object({
+        page: z.number().default(DEFAULT_PAGE),
+        pageSize: z
+          .number()
+          .min(MIN_PAGE_SIZE)
+          .max(MAX_PAGE_SIZE)
+          .default(DEFAULT_PAGE_SIZE),
+        search: z.string().nullish(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { search, page, pageSize } = input;
+      const data = await db
+        .select({
+          meetingsCount: sql<number>`5`,
+          ...getTableColumns(agents),
+        })
         .from(agents)
+        .where(
+          and(
+            eq(agents.userId, ctx.auth.user.id),
+            search ? ilike(agents.name, `%${search}%`) : undefined
+          )
+        )
+        .orderBy(desc(agents.createdAt), desc(agents.id))
+        .limit(pageSize)
+        .offset((page - 1) * pageSize);
+      const [total] = await db
+        .select({ count: count() })
+        .from(agents)
+        .where(
+          and(
+            eq(agents.userId, ctx.auth.user.id),
+            search ? ilike(agents.name, `%s{search}%`) : undefined
+          )
+        );
 
-        // await new Promise((resolve) => setTimeout(resolve, 3000))             // for loading
-        // throw new TRPCError({ code: 'BAD_GATEWAY' })                     // for error 
-        return data 
+      const totalPages = Math.ceil(total.count / pageSize)
+
+      // await new Promise((resolve) => setTimeout(resolve, 3000))             // for loading
+      // throw new TRPCError({ code: 'BAD_GATEWAY' })                     // for error
+      return {
+        items:data,
+        total:total.count, 
+        totalPages: totalPages
+      };
     }),
-    getOne: protectedProcedure
+  getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ( { input } ) => {
-        const data = await db
-        .select()
+    .query(async ({ input }) => {
+      const data = await db
+        .select({
+          meetingsCount: sql<number>`5`,
+          ...getTableColumns(agents),
+        })
         .from(agents)
-        .where(eq(agents.id, input.id))
-        // await new Promise((resolve) => setTimeout(resolve, 3000))             // for loading
-        // throw new TRPCError({ code: 'BAD_GATEWAY' })                     // for error 
-        return data[0] 
+        .where(eq(agents.id, input.id));
+      // await new Promise((resolve) => setTimeout(resolve, 3000))             // for loading
+      // throw new TRPCError({ code: 'BAD_GATEWAY' })                     // for error
+      return data[0];
     }),
-    
-    create: protectedProcedure
+
+  create: protectedProcedure
     .input(agentInsertSchema)
     .mutation(async ({ input, ctx }) => {
-        const [createdAgent] = await db
+      const [createdAgent] = await db
         .insert(agents)
         .values({
-            ...input,
-            userId: ctx.auth.user.id 
+          ...input,
+          userId: ctx.auth.user.id,
         })
-        .returning()
+        .returning();
 
-        return createdAgent;
-    })
-})
+      return createdAgent;
+    }),
+});
