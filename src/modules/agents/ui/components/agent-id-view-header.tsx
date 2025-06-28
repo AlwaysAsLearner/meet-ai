@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button'
 interface Props {
     agentId: string,
     agentName: string,
-    onEdit?: () => {},
-    onRemove?: () => {}
+    onEdit?: () => void,
+    onRemove?: () => void
 }
 const AgentIdViewHeader = ({ agentId, agentName, onEdit, onRemove}: Props) => {
   return (
