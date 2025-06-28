@@ -58,29 +58,34 @@ export const agentsRouter = createTRPCRouter({
           )
         );
 
-      const totalPages = Math.ceil(total.count / pageSize)
+      const totalPages = Math.ceil(total.count / pageSize);
 
       // await new Promise((resolve) => setTimeout(resolve, 3000))             // for loading
       // throw new TRPCError({ code: 'BAD_GATEWAY' })                     // for error
       return {
-        items:data,
-        total:total.count, 
-        totalPages: totalPages
+        items: data,
+        total: total.count,
+        totalPages: totalPages,
       };
     }),
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      const data = await db
+    .query(async ({ input, ctx }) => {
+      const [existingAgent] = await db
         .select({
           meetingsCount: sql<number>`5`,
           ...getTableColumns(agents),
         })
         .from(agents)
-        .where(eq(agents.id, input.id));
+        .where(
+          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id))
+        );
       // await new Promise((resolve) => setTimeout(resolve, 3000))             // for loading
       // throw new TRPCError({ code: 'BAD_GATEWAY' })                     // for error
-      return data[0];
+      if (!existingAgent){
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Agent not found' })
+      }
+      return existingAgent;
     }),
 
   create: protectedProcedure
