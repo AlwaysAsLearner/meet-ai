@@ -1,10 +1,16 @@
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/constants";
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE,
+} from "@/constants";
 import { db } from "@/db";
 import { agents, meetings } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { TRPCError } from "@trpc/server";;
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, ilike, sql, count } from "drizzle-orm";
 import { z } from "zod";
+import { meetingInsertSchema, meetingUpdateSchema } from "../schemas";
 
 export const meetingsRouter = createTRPCRouter({
   getMany: protectedProcedure
@@ -17,7 +23,8 @@ export const meetingsRouter = createTRPCRouter({
           .max(MAX_PAGE_SIZE)
           .default(DEFAULT_PAGE_SIZE),
         search: z.string().nullish(),
-      }))
+      })
+    )
     .query(async ({ ctx, input }) => {
       const { search, page, pageSize } = input;
       const data = await db
@@ -39,8 +46,8 @@ export const meetingsRouter = createTRPCRouter({
         .from(meetings)
         .where(
           and(
-            eq(agents.userId, ctx.auth.user.id),
-            search ? ilike(agents.name, `%s{search}%`) : undefined
+            eq(meetings.userId, ctx.auth.user.id),
+            search ? ilike(meetings.name, `%s{search}%`) : undefined
           )
         );
 
@@ -60,7 +67,6 @@ export const meetingsRouter = createTRPCRouter({
       const [existingMeeting] = await db
         .select({
           ...getTableColumns(meetings),
-
         })
         .from(meetings)
         .where(
@@ -68,9 +74,47 @@ export const meetingsRouter = createTRPCRouter({
         );
       // await new Promise((resolve) => setTimeout(resolve, 3000))             // for loading
       // throw new TRPCError({ code: 'BAD_GATEWAY' })                     // for error
-      if (!existingMeeting){
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Meeting not found' })
+      if (!existingMeeting) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Meeting not found",
+        });
       }
       return existingMeeting;
+    }),
+
+  create: protectedProcedure
+    .input(meetingInsertSchema)
+    .mutation(async ({ input, ctx }) => {
+      const [createdMeeting] = await db
+        .insert(meetings)
+        .values({
+          ...input,
+          userId: ctx.auth.user.id,
+        })
+        .returning();
+
+      return createdMeeting;
+    }),
+
+  update: protectedProcedure
+    .input(meetingUpdateSchema)
+    .mutation(async ({ input, ctx }) => {
+      const [updatedMeeting] = await db
+        .update(meetings)
+        .set(input)
+        .where(
+          and(eq(meetings.id, input.id), eq(meetings.userId, ctx.auth.user.id))
+        )
+        .returning();
+
+      if (!updatedMeeting) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Agent not found",
+        });
+      }
+
+      return updatedMeeting;
     }),
 });
