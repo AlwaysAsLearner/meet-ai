@@ -28,6 +28,11 @@ const CommandSelect = ({
 }: Props) => {
   const [open, setOpen] = useState(false);
   const selectedOption = options.find((option) => option.value === value);
+
+  const handleOpenChange = (value: boolean) => {
+    onSearch?.("")
+    setOpen(false)
+  }
   return (
     <>
       <Button
@@ -42,7 +47,7 @@ const CommandSelect = ({
       >
         <div>{selectedOption?.children ?? placeholder}</div>
       </Button>
-      <CommandResponsiveDialog shouldFilter={!onSearch} open={open} onOpenChange={setOpen}>
+      <CommandResponsiveDialog shouldFilter={!onSearch} open={open} onOpenChange={handleOpenChange}>
         <CommandInput placeholder="Search..." value={selectedOption?.value} onValueChange={onSearch} />
         <CommandList>
             <CommandEmpty>

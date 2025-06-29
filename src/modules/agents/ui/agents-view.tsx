@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAgentFilters } from "../hooks/use-agent-filters";
-import DataPagination from "./data-pagination";
+import DataPagination from "../../../components/data-pagination";
 import { useRouter } from "next/navigation";
 
 export const AgentsView = () => {
