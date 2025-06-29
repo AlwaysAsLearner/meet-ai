@@ -39,7 +39,6 @@ const MeetingForm = ({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [open, setOpen] = useState(false);
   const [agentSearch, setAgentSearch] = useState("");
   const agents = useQuery(
     trpc.agents.getMany.queryOptions({
