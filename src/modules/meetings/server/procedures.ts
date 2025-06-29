@@ -51,7 +51,7 @@ export const meetingsRouter = createTRPCRouter({
             eq(meetings.userId, ctx.auth.user.id),
             search ? ilike(meetings.name, `%${search}%`) : undefined,
             agentId ? eq(meetings.agentId, agentId) : undefined,
-            status ? eq(meetings.status, status) : undefined 
+            status ? eq(meetings.status, status) : undefined
           )
         )
         .orderBy(desc(meetings.createdAt), desc(meetings.id))
@@ -132,5 +132,22 @@ export const meetingsRouter = createTRPCRouter({
       }
 
       return updatedMeeting;
+    }),
+  remove: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const [removeMeeting] = await db
+        .delete(meetings)
+        .where(eq(meetings.id, input.id))
+        .returning();
+
+      if (!removeMeeting) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Agent not found",
+        });
+      }
+
+      return removeMeeting;
     }),
 });
