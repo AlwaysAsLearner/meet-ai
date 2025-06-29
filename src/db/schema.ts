@@ -6,9 +6,10 @@ import {
   text,
   timestamp,
   boolean,
+  pgEnum,
 } from "drizzle-orm/pg-core";
-import { nanoid } from 'nanoid'
-// example 
+import { nanoid } from "nanoid";
+// example
 // export const usersTable = pgTable('users_table', {
 //   id: serial('id').primaryKey(),
 //   name: text('name').notNull(),
@@ -40,7 +41,9 @@ export const session = pgTable("session", {
   updatedAt: timestamp("updated_at").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
 });
 
 export const account = pgTable("account", {
@@ -76,22 +79,52 @@ export const verification = pgTable("verification", {
 
 export const agents = pgTable("agents", {
   id: text("id")
-  .primaryKey()
-  .$defaultFn(() => nanoid()),
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
 
   name: text("name").notNull(),
-  userId: text('user_id')
-  .notNull()
-  .references(() => user.id, { onDelete: 'cascade' }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
 
-  instructions: text('instructions')
-  .notNull(),
+  instructions: text("instructions").notNull(),
 
-  createdAt: timestamp('created_at')
-  .notNull()
-  .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 
-  updatedAt: timestamp('updated_at')
-  .notNull()
-  .defaultNow()
-})
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const MeetingStatus = pgEnum("meeting_status", [
+  "upcoming",
+  "active",
+  "completed",
+  "processing",
+  "cancelled",
+]);
+
+export const meetings = pgTable("meetings", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+
+  name: text("name").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  agentId: text("agent_id")
+    .notNull()
+    .references(() => agents.id, { onDelete: "cascade" }),
+
+  status: MeetingStatus("status").notNull().default("upcoming"),
+
+  starteAt: timestamp("started_at"),
+  endedAt: timestamp("ended_at"),
+
+  transcriptUrl: text("trancript_url"),
+  recordingUrl: text("recording_url"),
+  summary: text('summary'),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
