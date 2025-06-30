@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { loadSearchParams } from "@/modules/agents/params";
+import { loadSearchParams } from "@/modules/meetings/params";
 import { AgentsViewLoading } from "@/modules/agents/ui/agents-view";
 import ListHeader from "@/modules/meetings/ui/components/list-header";
 import MeetingsView, {
